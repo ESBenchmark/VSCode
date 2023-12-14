@@ -8,7 +8,7 @@ const binName = join("node_modules", ".bin", platform === "win32" ? "esbench.CMD
 export class RunBenchmarkCommand implements vscode.Command {
 	static ID = "esbench.run";
 
-	readonly title = "Run Benchmark";
+	readonly title = "$(run) Run Benchmark";
 	readonly command = RunBenchmarkCommand.ID;
 	readonly arguments: [string, string];
 
@@ -17,7 +17,7 @@ export class RunBenchmarkCommand implements vscode.Command {
 	}
 }
 
-function findUp(directory: string, path: string) {
+function findUp(directory: string, path: string): string | null {
 	if (directory.length < 5) {
 		return null;
 	}
@@ -28,7 +28,7 @@ function findUp(directory: string, path: string) {
 	return findUp(dirname(directory), path);
 }
 
-export function runBenchmark(filename: string, pattern: string) {
+export function run(filename: string, pattern: string) {
 	const directory = dirname(filename);
 	
 	const packageJson = findUp(directory, "package.json");
