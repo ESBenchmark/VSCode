@@ -1,33 +1,29 @@
-import type * as ts from "typescript";
-import { CodeLensProvider, TextDocument, CancellationToken, Range, CodeLens } from "vscode";
+import type * as TypeScript from "typescript";
+import type { Node, ImportDeclaration, ExportAssignment, NamedImports } from "typescript";
+import { env, CodeLensProvider, TextDocument, CancellationToken, Range, CodeLens } from "vscode";
 import { RunBenchmarkCommand } from "./command.js";
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const ts: typeof TypeScript = require(`${env.appRoot}/extensions/node_modules/typescript/lib/typescript.js`);
 
 const CLIENT_MOD = "@esbench/core/client";
 
 export default class ESBenchCodeLensProvider implements CodeLensProvider {
 
-	private readonly typescript: typeof ts;
-
-	constructor(typescript: typeof ts) {
-		this.typescript = typescript;
-	}
-
 	provideCodeLenses(document: TextDocument, token: CancellationToken) {
-		const { typescript } = this;
-
-		const sourceFile = typescript.createSourceFile(
+		const sourceFile = ts.createSourceFile(
 			document.fileName,
 			document.getText(),
-			typescript.ScriptTarget.Latest,
+			ts.ScriptTarget.Latest,
 		);
 
 		let hasImportDefineSuite = false;
-		const runNodes: ts.Node[] = [];
+		const runNodes: Node[] = [];
 
 		if (token.isCancellationRequested) {
 			return;
 		}
-		typescript.forEachChild(sourceFile, visitor);
+		sourceFile.forEachChild(visitor);
 
 		return runNodes.map(node => {
 			const start = document.positionAt(node.getStart(sourceFile));
@@ -36,7 +32,7 @@ export default class ESBenchCodeLensProvider implements CodeLensProvider {
 			return new CodeLens(new Range(start, end), command);
 		});
 
-		function checkImport(node: ts.ImportDeclaration) {
+		function checkImport(node: ImportDeclaration) {
 			if (hasImportDefineSuite) {
 				return;
 			}
@@ -44,47 +40,47 @@ export default class ESBenchCodeLensProvider implements CodeLensProvider {
 			if (!importClause?.namedBindings) {
 				return;
 			}
-			if ((moduleSpecifier as any).text !== CLIENT_MOD) {
+			if (!ts.isStringLiteral(moduleSpecifier)) {
 				return;
 			}
-			const { elements } = importClause.namedBindings as ts.NamedImports;
+			if (moduleSpecifier.text !== CLIENT_MOD) {
+				return;
+			}
+			const { elements } = importClause.namedBindings as NamedImports;
 			hasImportDefineSuite = elements.some(i => i.name.text === "defineSuite");
 		}
 
-		function checkExport({ expression }: ts.ExportAssignment) {
-			if (!typescript.isCallExpression(expression)) {
+		function checkExport({ expression }: ExportAssignment) {
+			if (!ts.isCallExpression(expression)) {
 				return;
 			}
-			if ((expression.expression as any).text !== "defineSuite") {
+			const id = expression.expression;
+			if (!ts.isIdentifier(id) || id.text !== "defineSuite") {
 				return;
 			}
-
 			runNodes.push(expression);
-
-			const [suite] = expression.arguments;
-			if (suite) {
-				typescript.forEachChild(suite, visitBenchCase);
-			}
+			expression.arguments[0]?.forEachChild(visitBenchCase);
 		}
 
-		function visitBenchCase(node: ts.Node) {
-			if (typescript.isCallExpression(node)) {
-				const { expression, arguments: args } = node as ts.CallExpression;
+		function visitBenchCase(node: Node) {
+			if (ts.isCallExpression(node)) {
+				const { expression, arguments: args } = node;
+				const [name] = args;
 				if ((expression as any).name.text === "bench") {
-					if (args[0]?.kind === typescript.SyntaxKind.StringLiteral) {
+					if (ts.isStringLiteral(name)) {
 						runNodes.push(node);
 					}
 				}
 			}
-			typescript.forEachChild(node, visitBenchCase);
+			ts.forEachChild(node, visitBenchCase);
 		}
 
-		function visitor(node: ts.Node) {
-			switch (node.kind) {
-				case typescript.SyntaxKind.NamedImports:
-					return checkImport(node as any);
-				case typescript.SyntaxKind.ExportAssignment:
-					return checkExport(node as any);
+		function visitor(node: Node) {
+			if (ts.isImportDeclaration(node)) {
+				return checkImport(node);
+			}
+			if (ts.isExportAssignment(node)) {
+				return checkExport(node);
 			}
 		}
 	}
