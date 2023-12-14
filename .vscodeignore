@@ -1,0 +1,11 @@
+.github/**
+.vscode/**
+node_modeuls/**
+.gitignore
+.eslint*
+**/*.map
+src/**
+test/**
+*.vsix
+tsconfig.json
+pnpm-lock.yaml
