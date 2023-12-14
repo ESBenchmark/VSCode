@@ -6,6 +6,7 @@ import * as vscode from "vscode";
 const binName = join("node_modules", ".bin", platform === "win32" ? "esbench.CMD" : "esbench");
 
 export class RunBenchmarkCommand implements vscode.Command {
+
 	static ID = "esbench.run";
 
 	readonly title = "$(run) Run Benchmark";
@@ -17,36 +18,66 @@ export class RunBenchmarkCommand implements vscode.Command {
 	}
 }
 
-function findUp(directory: string, path: string): string | null {
-	if (directory.length < 5) {
+function findUp(root: string, directory: string, path: string): string | null {
+	if (directory.length < root.length) {
 		return null;
 	}
 	const file = join(directory, path);
 	if (existsSync(file)) {
 		return file;
 	}
-	return findUp(dirname(directory), path);
+	return findUp(root, dirname(directory), path);
+}
+
+function getWorkspaceRoot(file: string) {
+	const { workspaceFolders } = vscode.workspace;
+	if (!workspaceFolders) {
+		return;
+	}
+	for (const ws of workspaceFolders) {
+		if (file.startsWith(ws.uri.fsPath)) {
+			return ws.uri.fsPath;
+		}
+	}
+}
+
+const reSymbols = "\\.?*+^$[](){}|";
+
+function escapeRegexp(pattern: string) {
+	const characters = [];
+	for(const c of pattern) {
+		if (reSymbols.includes(c)) {
+			characters.push("\\");
+		}
+		characters.push(c);
+	}
+	return characters.join("");
 }
 
 export function run(filename: string, pattern: string) {
 	const directory = dirname(filename);
-	
-	const packageJson = findUp(directory, "package.json");
+	const root = getWorkspaceRoot(filename);
+
+	if (!root) {
+		return console.error("Can't deduce workspace to which the suite belong to");
+	}
+
+	const packageJson = findUp(root, directory, "package.json");
 	if (!packageJson) {
 		return console.error("Can't find package.json");
 	}
 
 	const workingDir = dirname(packageJson);
-	const binary = findUp(workingDir, binName);
+	const binary = findUp(root, workingDir, binName);
 	if (!binary) {
-		return console.error("Can't find ESBench bin file");
+		return console.error("Can't find ESBench binary file");
 	}
 
 	const args = [binary, "--file", filename];
 	if (pattern) {
-		args.push("--name", `^${pattern}$`);
+		args.push("--name", `^${escapeRegexp(pattern)}$`);
 	}
-
+	
 	const terminal = vscode.window.createTerminal({
 		name: "ESBench",
 		cwd: workingDir,
