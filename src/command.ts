@@ -45,13 +45,18 @@ const reSymbols = "\\.?*+^$[](){}|";
 
 function escapeRegexp(pattern: string) {
 	const characters = [];
-	for(const c of pattern) {
+	for (const c of pattern) {
 		if (reSymbols.includes(c)) {
 			characters.push("\\");
 		}
 		characters.push(c);
 	}
 	return characters.join("");
+}
+
+function escapeCli(param: string) {
+	param = param.replaceAll('"', '\\"');
+	return /[\s|]/.test(param) ? `"${param}"` : param;
 }
 
 export function run(filename: string, pattern: string) {
@@ -77,11 +82,11 @@ export function run(filename: string, pattern: string) {
 	if (pattern) {
 		args.push("--name", `^${escapeRegexp(pattern)}$`);
 	}
-	
+
 	const terminal = vscode.window.createTerminal({
-		name: "ESBench",
+		name: "ESBench - run",
 		cwd: workingDir,
 	});
-	terminal.sendText(args.join(" "), true);
 	terminal.show();
+	terminal.sendText(args.map(escapeCli).join(" "), true);
 }
