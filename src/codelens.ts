@@ -1,4 +1,4 @@
-import type * as TypeScript from "typescript";
+import type TypeScript from "typescript";
 import type { Node, ImportDeclaration, ExportAssignment, NamedImports } from "typescript";
 import { env, CodeLensProvider, TextDocument, CancellationToken, Range, CodeLens } from "vscode";
 import { RunBenchmarkCommand } from "./command.js";
@@ -11,6 +11,7 @@ const CLIENT_MOD = "@esbench/core/client";
 export class BenchmarkVisitor {
 
 	matches: Array<[Node, string]> = [];
+
 	isSuiteFile = false;
 
 	constructor() {
@@ -18,15 +19,24 @@ export class BenchmarkVisitor {
 		this.visitBenchCase = this.visitBenchCase.bind(this);
 	}
 
+	/**
+	 * find benchmarks in top-level nodes.
+	 *
+	 * @example
+	 * sourceFile.forEachChild(visitor.visit);
+	 */
 	visit(node: Node) {
 		if (ts.isImportDeclaration(node)) {
 			return this.checkImport(node);
 		}
 		if (ts.isExportAssignment(node)) {
-			return this.checkExport(node);
+			return this.visitExport(node);
 		}
 	}
 
+	/**
+	 * Check the file has <code>import { defineSuite } from "@esbench/core/client"</code>
+	 */
 	private checkImport(node: ImportDeclaration) {
 		if (this.isSuiteFile) {
 			return;
@@ -45,7 +55,7 @@ export class BenchmarkVisitor {
 		this.isSuiteFile = elements.some(i => i.name.text === "defineSuite");
 	}
 
-	private checkExport({ expression }: ExportAssignment) {
+	private visitExport({ expression }: ExportAssignment) {
 		if (!ts.isCallExpression(expression)) {
 			return;
 		}
@@ -69,7 +79,7 @@ export class BenchmarkVisitor {
 				this.matches.push([node, name.text]);
 			}
 		}
-		ts.forEachChild(node, this.visitBenchCase);
+		node.forEachChild(this.visitBenchCase);
 	}
 }
 
