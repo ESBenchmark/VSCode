@@ -8,6 +8,71 @@ const ts: typeof TypeScript = require(`${env.appRoot}/extensions/node_modules/ty
 
 const CLIENT_MOD = "@esbench/core/client";
 
+export class BenchmarkVisitor {
+
+	matches: Array<[Node, string]> = [];
+	isSuiteFile = false;
+
+	constructor() {
+		this.visit = this.visit.bind(this);
+		this.visitBenchCase = this.visitBenchCase.bind(this);
+	}
+
+	visit(node: Node) {
+		if (ts.isImportDeclaration(node)) {
+			return this.checkImport(node);
+		}
+		if (ts.isExportAssignment(node)) {
+			return this.checkExport(node);
+		}
+	}
+
+	private checkImport(node: ImportDeclaration) {
+		if (this.isSuiteFile) {
+			return;
+		}
+		const { moduleSpecifier, importClause } = node;
+		if (!importClause?.namedBindings) {
+			return;
+		}
+		if (!ts.isStringLiteral(moduleSpecifier)) {
+			return;
+		}
+		if (moduleSpecifier.text !== CLIENT_MOD) {
+			return;
+		}
+		const { elements } = importClause.namedBindings as NamedImports;
+		this.isSuiteFile = elements.some(i => i.name.text === "defineSuite");
+	}
+
+	private checkExport({ expression }: ExportAssignment) {
+		if (!ts.isCallExpression(expression)) {
+			return;
+		}
+		const id = expression.expression;
+		if (!ts.isIdentifier(id) || id.text !== "defineSuite") {
+			return;
+		}
+		this.matches.push([expression, ""]);
+		expression.arguments[0]?.forEachChild(this.visitBenchCase);
+	}
+
+	private visitBenchCase(node: Node) {
+		if (ts.isCallExpression(node)) {
+			const { expression, arguments: args } = node;
+			const [name] = args;
+			if (
+				ts.isPropertyAccessExpression(expression) &&
+				expression.name.text === "bench" &&
+				ts.isStringLiteral(name)
+			) {
+				this.matches.push([node, name.text]);
+			}
+		}
+		ts.forEachChild(node, this.visitBenchCase);
+	}
+}
+
 export default class ESBenchCodeLensProvider implements CodeLensProvider {
 
 	provideCodeLenses(document: TextDocument, token: CancellationToken) {
@@ -17,71 +82,20 @@ export default class ESBenchCodeLensProvider implements CodeLensProvider {
 			ts.ScriptTarget.Latest,
 		);
 
-		let hasImportDefineSuite = false;
-		const runNodes: Node[] = [];
-
 		if (token.isCancellationRequested) {
 			return;
 		}
-		sourceFile.forEachChild(visitor);
+		const visitor = new BenchmarkVisitor();
+		sourceFile.forEachChild(visitor.visit);
 
-		return runNodes.map(node => {
+		if (!visitor.isSuiteFile) {
+			return;
+		}
+		return visitor.matches.map(([node, name]) => {
 			const start = document.positionAt(node.getStart(sourceFile));
 			const end = document.positionAt(node.getEnd());
-			const command = new RunBenchmarkCommand(document.fileName, "");
+			const command = new RunBenchmarkCommand(document.fileName, name);
 			return new CodeLens(new Range(start, end), command);
 		});
-
-		function checkImport(node: ImportDeclaration) {
-			if (hasImportDefineSuite) {
-				return;
-			}
-			const { moduleSpecifier, importClause } = node;
-			if (!importClause?.namedBindings) {
-				return;
-			}
-			if (!ts.isStringLiteral(moduleSpecifier)) {
-				return;
-			}
-			if (moduleSpecifier.text !== CLIENT_MOD) {
-				return;
-			}
-			const { elements } = importClause.namedBindings as NamedImports;
-			hasImportDefineSuite = elements.some(i => i.name.text === "defineSuite");
-		}
-
-		function checkExport({ expression }: ExportAssignment) {
-			if (!ts.isCallExpression(expression)) {
-				return;
-			}
-			const id = expression.expression;
-			if (!ts.isIdentifier(id) || id.text !== "defineSuite") {
-				return;
-			}
-			runNodes.push(expression);
-			expression.arguments[0]?.forEachChild(visitBenchCase);
-		}
-
-		function visitBenchCase(node: Node) {
-			if (ts.isCallExpression(node)) {
-				const { expression, arguments: args } = node;
-				const [name] = args;
-				if ((expression as any).name.text === "bench") {
-					if (ts.isStringLiteral(name)) {
-						runNodes.push(node);
-					}
-				}
-			}
-			ts.forEachChild(node, visitBenchCase);
-		}
-
-		function visitor(node: Node) {
-			if (ts.isImportDeclaration(node)) {
-				return checkImport(node);
-			}
-			if (ts.isExportAssignment(node)) {
-				return checkExport(node);
-			}
-		}
 	}
 }

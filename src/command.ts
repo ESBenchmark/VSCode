@@ -3,6 +3,8 @@ import { dirname, join } from "path";
 import { existsSync } from "fs";
 import * as vscode from "vscode";
 
+const binName = join("node_modules", ".bin", platform === "win32" ? "esbench.CMD" : "esbench");
+
 export class RunBenchmarkCommand implements vscode.Command {
 	static ID = "esbench.run";
 
@@ -15,10 +17,6 @@ export class RunBenchmarkCommand implements vscode.Command {
 	}
 }
 
-vscode.commands.registerCommand(RunBenchmarkCommand.ID, runInTerminal);
-
-const binName = join("node_modules", ".bin", platform === "win32" ? "esbench.CMD" : "esbench");
-
 function findUp(directory: string, path: string) {
 	if (directory.length < 5) {
 		return null;
@@ -30,18 +28,18 @@ function findUp(directory: string, path: string) {
 	return findUp(dirname(directory), path);
 }
 
-export function runInTerminal(filename: string, pattern: string) {
+export function runBenchmark(filename: string, pattern: string) {
 	const directory = dirname(filename);
 	
 	const packageJson = findUp(directory, "package.json");
 	if (!packageJson) {
-		return console.error("Can't find ESBench bin file.");
+		return console.error("Can't find package.json");
 	}
 
 	const workingDir = dirname(packageJson);
 	const binary = findUp(workingDir, binName);
 	if (!binary) {
-		return console.error("Can't find ESBench bin file.");
+		return console.error("Can't find ESBench bin file");
 	}
 
 	const args = [binary, "--file", filename];
