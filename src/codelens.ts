@@ -1,5 +1,6 @@
 import type * as ts from "typescript";
 import { CodeLensProvider, TextDocument, CancellationToken, Range, CodeLens } from "vscode";
+import { RunBenchmarkCommand } from "./command.js";
 
 const CLIENT_MOD = "@esbench/core/client";
 
@@ -13,7 +14,7 @@ export default class ESBenchCodeLensProvider implements CodeLensProvider {
 
 	provideCodeLenses(document: TextDocument, token: CancellationToken) {
 		const { typescript } = this;
-		
+
 		const sourceFile = typescript.createSourceFile(
 			document.fileName,
 			document.getText(),
@@ -21,13 +22,19 @@ export default class ESBenchCodeLensProvider implements CodeLensProvider {
 		);
 
 		let hasImportDefineSuite = false;
+		const runNodes: ts.Node[] = [];
 
 		if (token.isCancellationRequested) {
 			return;
 		}
 		typescript.forEachChild(sourceFile, visitor);
 
-		return [];
+		return runNodes.map(node => {
+			const start = document.positionAt(node.getStart(sourceFile));
+			const end = document.positionAt(node.getEnd());
+			const command = new RunBenchmarkCommand(document.fileName, "");
+			return new CodeLens(new Range(start, end), command);
+		});
 
 		function checkImport(node: ts.ImportDeclaration) {
 			if (hasImportDefineSuite) {
@@ -51,7 +58,9 @@ export default class ESBenchCodeLensProvider implements CodeLensProvider {
 			if ((expression.expression as any).text !== "defineSuite") {
 				return;
 			}
-			// run suite
+
+			runNodes.push(expression);
+
 			const [suite] = expression.arguments;
 			if (suite) {
 				typescript.forEachChild(suite, visitBenchCase);
@@ -63,8 +72,7 @@ export default class ESBenchCodeLensProvider implements CodeLensProvider {
 				const { expression, arguments: args } = node as ts.CallExpression;
 				if ((expression as any).name.text === "bench") {
 					if (args[0]?.kind === typescript.SyntaxKind.StringLiteral) {
-						const name = (args[0] as ts.StringLiteral).text;
-						// run case
+						runNodes.push(node);
 					}
 				}
 			}
