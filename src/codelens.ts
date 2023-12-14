@@ -1,5 +1,5 @@
-import type * as ts from 'typescript';
-import { CodeLensProvider, TextDocument, CancellationToken, Range, CodeLens } from 'vscode';
+import type * as ts from "typescript";
+import { CodeLensProvider, TextDocument, CancellationToken, Range, CodeLens } from "vscode";
 
 const CLIENT_MOD = "@esbench/core/client";
 
@@ -17,7 +17,7 @@ export default class ESBenchCodeLensProvider implements CodeLensProvider {
 		const sourceFile = typescript.createSourceFile(
 			document.fileName,
 			document.getText(),
-			typescript.ScriptTarget.Latest
+			typescript.ScriptTarget.Latest,
 		);
 
 		let hasImportDefineSuite = false;
@@ -69,10 +69,6 @@ export default class ESBenchCodeLensProvider implements CodeLensProvider {
 				}
 			}
 			typescript.forEachChild(node, visitBenchCase);
-		}
-
-		function debug(x: any) {
-			typescript.forEachChild(x, node => console.log(typescript.SyntaxKind[node.kind]));
 		}
 
 		function visitor(node: ts.Node) {
