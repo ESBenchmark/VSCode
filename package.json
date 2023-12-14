@@ -1,20 +1,19 @@
 {
-	"name": "vscode-esbench",
-	"displayName": "ESBench Runner",
+	"name": "esbench-vscode",
+	"description": "Run benchmark by clicking on the codelens.",
 	"version": "0.1.0",
 	"license": "MIT",
-	"description": "Run benchmark by clicking on the codelens.",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Kaciras/esbench-vscode"
+	},
+	"displayName": "ESBench Runner",
 	"engines": {
 		"vscode": "^1.85.0"
 	},
 	"main": "dist/extension.js",
 	"categories": [
 		"Other"
-	],
-	"keywords": [
-		"vitest",
-		"runner",
-		"codelens"
 	],
 	"scripts": {
 		"package": "tsc && vsce package --no-dependencies",
