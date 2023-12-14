@@ -3,7 +3,9 @@ import { dirname, join } from "path";
 import { existsSync } from "fs";
 import * as vscode from "vscode";
 
-const binName = join("node_modules", ".bin", platform === "win32" ? "esbench.CMD" : "esbench");
+const BIN = join("node_modules", ".bin", platform === "win32" ? "esbench.CMD" : "esbench");
+
+const TITLE_RUN = "ESBench - run";
 
 export class RunBenchmarkCommand implements vscode.Command {
 
@@ -73,7 +75,7 @@ export function run(filename: string, pattern: string) {
 	}
 
 	const workingDir = dirname(packageJson);
-	const binary = findUp(root, workingDir, binName);
+	const binary = findUp(root, workingDir, BIN);
 	if (!binary) {
 		return console.error("Can't find ESBench binary file");
 	}
@@ -83,8 +85,13 @@ export function run(filename: string, pattern: string) {
 		args.push("--name", `^${escapeRegexp(pattern)}$`);
 	}
 
+	// Close previous terminals ensures signalton running.
+	vscode.window.terminals
+		.filter(t => t.name === TITLE_RUN)
+		.forEach(t => t.dispose());
+
 	const terminal = vscode.window.createTerminal({
-		name: "ESBench - run",
+		name: TITLE_RUN,
 		cwd: workingDir,
 	});
 	terminal.show();
