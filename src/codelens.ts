@@ -73,8 +73,9 @@ export class BenchmarkVisitor {
 			const [name] = args;
 			if (
 				ts.isPropertyAccessExpression(expression) &&
-				expression.name.text === "bench" &&
-				ts.isStringLiteral(name)
+				args.length > 1 &&
+				ts.isStringLiteral(name) &&
+				/^bench(Async)?$/.test(expression.name.text)
 			) {
 				this.matches.push([node, name.text]);
 			}
