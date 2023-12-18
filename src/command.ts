@@ -61,6 +61,8 @@ function escapeCli(param: string) {
 	return /[\s|]/.test(param) ? `"${param}"` : param;
 }
 
+let terminal: vscode.Terminal | undefined;
+
 export function run(filename: string, pattern: string) {
 	const directory = dirname(filename);
 	const root = getWorkspaceRoot(filename);
@@ -86,11 +88,9 @@ export function run(filename: string, pattern: string) {
 	}
 
 	// Close previous terminals ensures signalton running.
-	vscode.window.terminals
-		.filter(t => t.name === TITLE_RUN)
-		.forEach(t => t.dispose());
+	terminal?.dispose();
 
-	const terminal = vscode.window.createTerminal({
+	terminal = vscode.window.createTerminal({
 		name: TITLE_RUN,
 		cwd: workingDir,
 	});
