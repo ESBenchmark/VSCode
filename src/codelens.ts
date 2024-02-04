@@ -3,10 +3,11 @@ import type { Node, ImportDeclaration, ExportAssignment, NamedImports } from "ty
 import { env, CodeLensProvider, TextDocument, CancellationToken, Range, CodeLens } from "vscode";
 import { RunBenchmarkCommand } from "./command.js";
 
+// VSCode does not support impoty(), https://github.com/microsoft/vscode/issues/130367
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ts: typeof TypeScript = require(`${env.appRoot}/extensions/node_modules/typescript/lib/typescript.js`);
 
-const CLIENT_MOD = "@esbench/core/client";
+const CLIENT_MODULE = "esbench";
 
 export class BenchmarkVisitor {
 
@@ -48,7 +49,7 @@ export class BenchmarkVisitor {
 		if (!ts.isStringLiteral(moduleSpecifier)) {
 			return;
 		}
-		if (moduleSpecifier.text !== CLIENT_MOD) {
+		if (moduleSpecifier.text !== CLIENT_MODULE) {
 			return;
 		}
 		const { elements } = importClause.namedBindings as NamedImports;
