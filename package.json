@@ -16,6 +16,7 @@
 		"Other"
 	],
 	"scripts": {
+		"lint": "eslint --fix .",
 		"package": "tsc && vsce package --no-dependencies",
 		"watch": "tsc --watch",
 		"publish": "vsce publish --no-dependencies"

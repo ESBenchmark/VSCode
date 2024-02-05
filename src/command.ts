@@ -1,7 +1,7 @@
 import { platform } from "process";
 import { dirname, join } from "path";
-import { existsSync } from "fs";
 import * as vscode from "vscode";
+import { escapeRegExp, escapeCLI, findUp } from "./utils";
 
 const BIN = join("node_modules", ".bin", platform === "win32" ? "esbench.CMD" : "esbench");
 
@@ -20,17 +20,6 @@ export class RunBenchmarkCommand implements vscode.Command {
 	}
 }
 
-function findUp(root: string, directory: string, path: string): string | null {
-	if (directory.length < root.length) {
-		return null;
-	}
-	const file = join(directory, path);
-	if (existsSync(file)) {
-		return file;
-	}
-	return findUp(root, dirname(directory), path);
-}
-
 function getWorkspaceRoot(file: string) {
 	const { workspaceFolders } = vscode.workspace;
 	if (!workspaceFolders) {
@@ -41,24 +30,6 @@ function getWorkspaceRoot(file: string) {
 			return ws.uri.fsPath;
 		}
 	}
-}
-
-const reSymbols = "\\.?*+^$[](){}|";
-
-function escapeRegexp(pattern: string) {
-	const characters = [];
-	for (const c of pattern) {
-		if (reSymbols.includes(c)) {
-			characters.push("\\");
-		}
-		characters.push(c);
-	}
-	return characters.join("");
-}
-
-function escapeCli(param: string) {
-	param = param.replaceAll('"', '\\"');
-	return /[\s|]/.test(param) ? `"${param}"` : param;
 }
 
 let terminal: vscode.Terminal | undefined;
@@ -84,7 +55,7 @@ export function run(filename: string, pattern: string) {
 
 	const args = [binary, "--file", filename];
 	if (pattern) {
-		args.push("--name", `^${escapeRegexp(pattern)}$`);
+		args.push("--name", `^${escapeRegExp(pattern)}$`);
 	}
 
 	// Close previous terminals ensures signalton running.
@@ -95,5 +66,5 @@ export function run(filename: string, pattern: string) {
 		cwd: workingDir,
 	});
 	terminal.show();
-	terminal.sendText(args.map(escapeCli).join(" "), true);
+	terminal.sendText(args.map(escapeCLI).join(" "), true);
 }

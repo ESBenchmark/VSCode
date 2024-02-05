@@ -36,7 +36,7 @@ export class BenchmarkVisitor {
 	}
 
 	/**
-	 * Check the file has <code>import { defineSuite } from "@esbench/core/client"</code>
+	 * Check the file has <code>import { defineSuite } from "esbench"</code>
 	 */
 	private checkImport(node: ImportDeclaration) {
 		if (this.isSuiteFile) {
