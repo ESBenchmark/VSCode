@@ -1,7 +1,7 @@
 import { platform } from "process";
 import { dirname, join } from "path";
 import * as vscode from "vscode";
-import { escapeRegExp, escapeCLI, findUp } from "./utils";
+import { escapeRegExp, escapeCLI, findUp } from "./utils.js";
 
 const BIN = join("node_modules", ".bin", platform === "win32" ? "esbench.CMD" : "esbench");
 
