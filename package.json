@@ -8,6 +8,7 @@
 		"url": "https://github.com/Kaciras/esbench-vscode"
 	},
 	"displayName": "ESBench Runner",
+	"icon": "logo.png",
 	"engines": {
 		"vscode": "^1.85.0"
 	},
