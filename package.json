@@ -17,7 +17,7 @@
 		"Other"
 	],
 	"scripts": {
-		"lint": "eslint --fix .",
+		"lint": "eslint --fix",
 		"package": "tsc && vsce package --no-dependencies",
 		"watch": "tsc --watch",
 		"publish": "vsce publish --no-dependencies"
@@ -29,12 +29,12 @@
 		"onLanguage:javascriptreact"
 	],
 	"devDependencies": {
-		"@kaciras/eslint-config-core": "^2.6.4",
-		"@kaciras/eslint-config-typescript": "^2.6.4",
+		"@kaciras/eslint-config-core": "^3.0.1",
+		"@kaciras/eslint-config-typescript": "^3.0.1",
 		"@types/node": "^20.12.7",
 		"@types/vscode": "^1.88.0",
 		"@vscode/vsce": "^2.26.0",
-		"eslint": "^8.57.0",
+		"eslint": "^9.1.1",
 		"typescript": "^5.4.5"
 	}
 }
