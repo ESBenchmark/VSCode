@@ -5,7 +5,7 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/Kaciras/esbench-vscode"
+		"url": "https://github.com/ESBenchmark/VSCode"
 	},
 	"displayName": "ESBench Runner",
 	"icon": "logo.png",
