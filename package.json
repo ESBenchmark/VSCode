@@ -3,11 +3,12 @@
 	"description": "Run benchmark by clicking on the codelens.",
 	"version": "0.1.0",
 	"license": "MIT",
+	"publisher": "Kaciras",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/ESBenchmark/VSCode"
 	},
-	"displayName": "ESBench Runner",
+	"displayName": "ESBench",
 	"icon": "logo.png",
 	"engines": {
 		"vscode": "^1.85.0"
@@ -20,6 +21,7 @@
 		"lint": "eslint --fix",
 		"package": "tsc && vsce package --no-dependencies",
 		"watch": "tsc --watch",
+		"login": "vsce login",
 		"publish": "vsce publish --no-dependencies"
 	},
 	"activationEvents": [
@@ -32,7 +34,7 @@
 		"@kaciras/eslint-config-core": "^3.0.1",
 		"@kaciras/eslint-config-typescript": "^3.0.1",
 		"@types/node": "^20.12.8",
-		"@types/vscode": "^1.89.0",
+		"@types/vscode": "^1.85.0",
 		"@vscode/vsce": "^2.26.1",
 		"eslint": "^9.2.0",
 		"typescript": "^5.4.5"
