@@ -1,7 +1,6 @@
-import { platform } from "process";
-import { dirname, join } from "path";
+import { dirname } from "path";
 import * as vscode from "vscode";
-import { escapeRegExp, escapeCLI, findUp } from "./utils.js";
+import { escapeCLI, escapeRegExp, findUp } from "./utils.js";
 
 const BIN = "node_modules/esbench/lib/host/cli.js";
 
@@ -45,27 +44,27 @@ function getWorkspaceRoot(file: string) {
 	return workspaceFolders.find(ws => file.startsWith(ws.uri.fsPath));
 }
 
-function getRunConfig(filename: string, pattern: string) {
-	const directory = dirname(filename);
-	const ws = getWorkspaceRoot(filename);
+function getRunConfig(file: string, pattern: string) {
+	const directory = dirname(file);
+	const ws = getWorkspaceRoot(file);
 	
 	if (!ws) {
-		return console.error("Can't deduce workspace to which the suite belong to");
+		return alertError("Can't deduce workspace to which the suite belong to");
 	}
 
 	const root = ws!.uri.fsPath;
 	const packageJson = findUp(root, directory, "package.json");
 	if (!packageJson) {
-		return console.error("Can't find package.json");
+		return alertError("Can't find package.json");
 	}
 
 	const workingDir = dirname(packageJson);
 	const cli = findUp(root, workingDir, BIN);
 	if (!cli) {
-		return console.error("Can't find ESBench binary file");
+		return alertError("Can't find ESBench binary file");
 	}
 
-	const args = [cli, "--file", filename];
+	const args = [cli, "--file", file];
 	if (pattern) {
 		args.push("--name", `^${escapeRegExp(pattern)}$`);
 	}
@@ -75,7 +74,7 @@ function getRunConfig(filename: string, pattern: string) {
 
 let terminal: vscode.Terminal | undefined;
 
-export function run(file: string, pattern: string) {
+export function start(file: string, pattern: string) {
 	const config = getRunConfig(file, pattern);
 
 	if (!config) {
@@ -98,7 +97,7 @@ export function run(file: string, pattern: string) {
 	terminal.sendText(args.join(" "), true);
 }
 
-export function debug(file: string, pattern: string) {
+export function startDebug(file: string, pattern: string) {
 	const config = getRunConfig(file, pattern);
 
 	if (!config) {
