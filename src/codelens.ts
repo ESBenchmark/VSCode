@@ -1,7 +1,7 @@
 import type TypeScript from "typescript";
 import type { Node, ImportDeclaration, ExportAssignment, NamedImports } from "typescript";
 import { env, CodeLensProvider, TextDocument, CancellationToken, Range, CodeLens } from "vscode";
-import { RunBenchmarkCommand } from "./command.js";
+import { DebugBenchmarkCommand, RunBenchmarkCommand } from "./command.js";
 
 // VSCode does not support impoty(), https://github.com/microsoft/vscode/issues/130367
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -103,11 +103,19 @@ export default class ESBenchCodeLensProvider implements CodeLensProvider {
 		if (!visitor.isSuiteFile) {
 			return;
 		}
-		return visitor.matches.map(([node, name]) => {
+		const codeLenses = [];
+		for(const [node,name] of visitor.matches) {
 			const start = document.positionAt(node.getStart(sourceFile));
 			const end = document.positionAt(node.getEnd());
-			const command = new RunBenchmarkCommand(document.fileName, name);
-			return new CodeLens(new Range(start, end), command);
-		});
+
+			const run = new RunBenchmarkCommand(document.fileName, name);
+			const debug = new DebugBenchmarkCommand(document.fileName, name);
+
+			codeLenses.push(
+				new CodeLens(new Range(start, end), run),
+				new CodeLens(new Range(start, end), debug),
+			)
+		}
+		return codeLenses;
 	}
 }
