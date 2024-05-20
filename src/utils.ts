@@ -26,7 +26,7 @@ export function escapeCLI(param: string) {
  * @param path The file name to find.
  * @returns Path of the file, or null if not found.
  */
-export function findUp(root: string, directory: string, path: string): string | null {
+export function findUp(root: string, directory: string, path: string) {
 	if (directory.length < root.length) {
 		return null;
 	}

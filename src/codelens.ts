@@ -103,19 +103,15 @@ export default class ESBenchCodeLensProvider implements CodeLensProvider {
 		if (!visitor.isSuiteFile) {
 			return;
 		}
-		const codeLenses = [];
-		for(const [node,name] of visitor.matches) {
+		return visitor.matches.flatMap(([node, name]) => {
 			const start = document.positionAt(node.getStart(sourceFile));
 			const end = document.positionAt(node.getEnd());
+			const range = new Range(start, end);
 
 			const run = new RunBenchmarkCommand(document.fileName, name);
 			const debug = new DebugBenchmarkCommand(document.fileName, name);
 
-			codeLenses.push(
-				new CodeLens(new Range(start, end), run),
-				new CodeLens(new Range(start, end), debug),
-			)
-		}
-		return codeLenses;
+			return [new CodeLens(range, run), new CodeLens(range, debug)];
+		});
 	}
 }

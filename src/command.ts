@@ -23,7 +23,7 @@ export class DebugBenchmarkCommand implements vscode.Command {
 
 	static ID = "esbench.debug";
 
-	readonly title = "$(debug) debug";
+	readonly title = "$(debug) Debug";
 	readonly command = DebugBenchmarkCommand.ID;
 	readonly arguments: [string, string];
 
@@ -46,13 +46,13 @@ function getWorkspaceRoot(file: string) {
 
 function getRunConfig(file: string, pattern: string) {
 	const directory = dirname(file);
-	const ws = getWorkspaceRoot(file);
-	
-	if (!ws) {
+	const workspace = getWorkspaceRoot(file);
+
+	if (!workspace) {
 		return alertError("Can't deduce workspace to which the suite belong to");
 	}
 
-	const root = ws!.uri.fsPath;
+	const root = workspace.uri.fsPath;
 	const packageJson = findUp(root, directory, "package.json");
 	if (!packageJson) {
 		return alertError("Can't find package.json");
@@ -61,15 +61,15 @@ function getRunConfig(file: string, pattern: string) {
 	const workingDir = dirname(packageJson);
 	const cli = findUp(root, workingDir, BIN);
 	if (!cli) {
-		return alertError("Can't find ESBench binary file");
+		return alertError("Can't find ESBench package");
 	}
 
-	const args = [cli, "--file", file];
+	const cliArgs = [cli, "--file", file];
 	if (pattern) {
-		args.push("--name", `^${escapeRegExp(pattern)}$`);
+		cliArgs.push("--name", `^${escapeRegExp(pattern)}$`);
 	}
 
-	return { workingDir, args };
+	return { workspace, workingDir, cliArgs };
 }
 
 let terminal: vscode.Terminal | undefined;
@@ -82,7 +82,7 @@ export function start(file: string, pattern: string) {
 	}
 
 	const args: string[] = ["node"];
-	for (const raw of config.args) {
+	for (const raw of config.cliArgs) {
 		args.push(escapeCLI(raw));
 	}
 
@@ -104,11 +104,12 @@ export function startDebug(file: string, pattern: string) {
 		return;
 	}
 
+	// https://github.com/microsoft/vscode-js-debug/blob/main/src/configuration.ts
 	const debugConfig: vscode.DebugConfiguration = {
 		name: 'Debug Benchmarks',
 		type: 'pwa-node',
 		request: 'launch',
-		runtimeArgs: config.args,
+		runtimeArgs: config.cliArgs,
 		cwd: config.workingDir,
 		autoAttachChildProcesses: true,
 		skipFiles: ['<node_internals>/**'],

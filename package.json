@@ -21,7 +21,6 @@
 		"lint": "eslint --fix",
 		"package": "tsc && vsce package --no-dependencies",
 		"watch": "tsc --watch",
-		"login": "vsce login",
 		"publish": "vsce publish --no-dependencies"
 	},
 	"activationEvents": [
