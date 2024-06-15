@@ -30,12 +30,12 @@
 		"onLanguage:javascriptreact"
 	],
 	"devDependencies": {
-		"@kaciras/eslint-config-core": "^3.0.2",
-		"@kaciras/eslint-config-typescript": "^3.0.2",
-		"@types/node": "^20.13.0",
-		"@types/vscode": "^1.85.0",
-		"@vscode/vsce": "^2.26.1",
-		"eslint": "^9.4.0",
+		"@kaciras/eslint-config-core": "^3.0.3",
+		"@kaciras/eslint-config-typescript": "^3.0.3",
+		"@types/node": "^20.14.2",
+		"@types/vscode": "^1.90.0",
+		"@vscode/vsce": "^2.27.0",
+		"eslint": "^9.5.0",
 		"typescript": "^5.4.5"
 	}
 }
