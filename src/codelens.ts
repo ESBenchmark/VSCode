@@ -4,7 +4,7 @@ import { env, CodeLensProvider, TextDocument, CancellationToken, Range, CodeLens
 import { DebugBenchmarkCommand, RunBenchmarkCommand } from "./command.js";
 
 // VSCode does not support impoty(), https://github.com/microsoft/vscode/issues/130367
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const ts: typeof TypeScript = require(`${env.appRoot}/extensions/node_modules/typescript/lib/typescript.js`);
 
 const CLIENT_MODULE = "esbench";
