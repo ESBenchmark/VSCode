@@ -81,7 +81,10 @@ export function start(file: string, pattern: string) {
 		return;
 	}
 
-	const args: string[] = ["node"];
+	const args: string[] = [
+		"node", 
+		"--experimental-import-meta-resolve",
+	];
 	for (const raw of config.cliArgs) {
 		args.push(escapeCLI(raw));
 	}
@@ -106,16 +109,17 @@ export function startDebug(file: string, pattern: string) {
 
 	// https://github.com/microsoft/vscode-js-debug/blob/main/src/configuration.ts
 	const debugConfig: vscode.DebugConfiguration = {
-		name: 'Debug Benchmarks',
-		type: 'pwa-node',
-		request: 'launch',
-		runtimeArgs: config.cliArgs,
+		name: "Debug Benchmarks",
+		type: "pwa-node",
+		request: "launch",
+		runtimeArgs: ["--experimental-import-meta-resolve"],
+		args: config.cliArgs,
 		cwd: config.workingDir,
 		autoAttachChildProcesses: true,
-		skipFiles: ['<node_internals>/**'],
+		skipFiles: ["<node_internals>/**"],
 		console: "integratedTerminal",
-		internalConsoleOptions: 'neverOpen',
-	}
+		internalConsoleOptions: "neverOpen",
+	};
 
 	return vscode.debug.startDebugging(undefined, debugConfig);
 }
