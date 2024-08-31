@@ -1,5 +1,6 @@
 .github/**
 .vscode/**
+.idea/**
 node_modeuls/**
 .gitignore
 .eslint*
@@ -9,3 +10,5 @@ test/**
 *.vsix
 tsconfig.json
 pnpm-lock.yaml
+screenshot.webp
+eslint.config.*
