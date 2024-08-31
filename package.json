@@ -1,7 +1,7 @@
 {
 	"name": "esbench-vscode",
-	"description": "Run benchmark by clicking on the codelens.",
-	"version": "1.0.0",
+	"description": "Provides support for ESBench to make writing and running benchmarks easier.",
+	"version": "1.1.0",
 	"license": "MIT",
 	"publisher": "Kaciras",
 	"repository": {
