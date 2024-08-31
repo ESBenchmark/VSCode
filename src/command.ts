@@ -64,12 +64,27 @@ function getRunConfig(file: string, pattern: string) {
 		return alertError("Can't find ESBench package");
 	}
 
+	const settings = vscode.workspace.getConfiguration("esbench");
 	const cliArgs = [cli, "--file", file];
 	if (pattern) {
 		cliArgs.push("--name", `^${escapeRegExp(pattern)}$`);
 	}
 
-	return { workspace, workingDir, cliArgs };
+	const configFile = settings.get("configFile");
+	if (configFile) {
+		cliArgs.push("--config", configFile as string);
+	}
+
+	const extraArgs = settings.get("arguments");
+	if (extraArgs) {
+		cliArgs.push(...extraArgs as string[]);
+	}
+
+	const interpreter = settings.get("interpreter") as string;
+	const options = settings.get("nodeOptions") as string[];
+	const env = settings.get("env") as Record<string, string> | undefined;
+
+	return { workingDir, interpreter, env, options, cliArgs };
 }
 
 let terminal: vscode.Terminal | undefined;
@@ -78,13 +93,15 @@ export function start(file: string, pattern: string) {
 	const config = getRunConfig(file, pattern);
 
 	if (!config) {
-		return;
+		return; // Cannot run ESBench.
 	}
 
 	const args: string[] = [
-		"node", 
-		"--experimental-import-meta-resolve",
+		config.interpreter || "node",
 	];
+	for (const raw of config.options) {
+		args.push(escapeCLI(raw));
+	}
 	for (const raw of config.cliArgs) {
 		args.push(escapeCLI(raw));
 	}
@@ -94,6 +111,7 @@ export function start(file: string, pattern: string) {
 
 	terminal = vscode.window.createTerminal({
 		name: TITLE_RUN,
+		env: config.env,
 		cwd: config.workingDir,
 	});
 	terminal.show();
@@ -112,9 +130,11 @@ export function startDebug(file: string, pattern: string) {
 		name: "Debug Benchmarks",
 		type: "pwa-node",
 		request: "launch",
-		runtimeArgs: ["--experimental-import-meta-resolve"],
+		runtimeExecutable: config.interpreter,
+		runtimeArgs: config.options,
 		args: config.cliArgs,
 		cwd: config.workingDir,
+		env: config.env,
 		autoAttachChildProcesses: true,
 		skipFiles: ["<node_internals>/**"],
 		console: "integratedTerminal",

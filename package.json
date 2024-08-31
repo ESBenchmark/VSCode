@@ -29,6 +29,38 @@
 		"onLanguage:typescriptreact",
 		"onLanguage:javascriptreact"
 	],
+	"contributes": {
+		"configuration": {
+			"title": "ESBench",
+			"properties": {
+				"esbench.interpreter": {
+					"type": "string",
+					"description": "The path to the Node.js executable. If not assigned, uses VSCode's Node.js instance."
+				},
+				"esbench.nodeOptions": {
+					"type": "array",
+					"description": "Arguments passed to the interpreter.",
+					"default": ["--experimental-import-meta-resolve"]
+				},
+				"esbench.env": {
+					"markdownDescription": "The env passed to runner process in addition to `process.env`",
+					"default": null,
+					"type": [
+						"null",
+						"object"
+					]
+				},
+				"esbench.configFile": {
+					"type": "string",
+					"description": "The path to ESBench config file."
+				},
+				"esbench.arguments": {
+					"type": "array",
+					"description": "Addiontional arguments passed to ESBench cli."
+				}
+			}
+		}
+	},
 	"devDependencies": {
 		"@kaciras/eslint-config-core": "^3.2.0",
 		"@kaciras/eslint-config-typescript": "^3.2.0",
