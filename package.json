@@ -40,7 +40,9 @@
 				"esbench.nodeOptions": {
 					"type": "array",
 					"description": "Arguments passed to the interpreter.",
-					"default": ["--experimental-import-meta-resolve"]
+					"default": [
+						"--experimental-import-meta-resolve"
+					]
 				},
 				"esbench.env": {
 					"markdownDescription": "The env passed to runner process in addition to `process.env`",
@@ -64,10 +66,10 @@
 	"devDependencies": {
 		"@kaciras/eslint-config-core": "^3.2.0",
 		"@kaciras/eslint-config-typescript": "^3.2.0",
-		"@types/node": "^22.5.0",
-		"@types/vscode": "^1.85.0",
-		"@vscode/vsce": "^3.0.0",
-		"eslint": "^9.9.1",
+		"@types/node": "^22.5.4",
+		"@types/vscode": "^1.93.0",
+		"@vscode/vsce": "^3.1.0",
+		"eslint": "^9.10.0",
 		"typescript": "^5.5.4"
 	}
 }
