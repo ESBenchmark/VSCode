@@ -64,12 +64,12 @@
 		}
 	},
 	"devDependencies": {
-		"@kaciras/eslint-config-core": "^3.2.0",
-		"@kaciras/eslint-config-typescript": "^3.2.0",
-		"@types/node": "^22.10.1",
-		"@types/vscode": "^1.95.0",
+		"@kaciras/eslint-config-core": "^3.2.1",
+		"@kaciras/eslint-config-typescript": "^3.2.1",
+		"@types/node": "^22.10.2",
+		"@types/vscode": "^1.96.0",
 		"@vscode/vsce": "^3.2.1",
-		"eslint": "^9.16.0",
+		"eslint": "^9.17.0",
 		"typescript": "^5.7.2"
 	}
 }
