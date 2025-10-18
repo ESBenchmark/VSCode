@@ -1,6 +1,6 @@
 import { dirname } from "path";
 import * as vscode from "vscode";
-import { escapeCLI, escapeRegExp, findUp } from "./utils.js";
+import { escapeCLI, findUp } from "./utils.js";
 
 const BIN = "node_modules/esbench/lib/host/cli.js";
 
@@ -67,7 +67,8 @@ function getRunConfig(file: string, pattern: string) {
 	const settings = vscode.workspace.getConfiguration("esbench");
 	const cliArgs = [cli, "--file", file];
 	if (pattern) {
-		cliArgs.push("--name", `^${escapeRegExp(pattern)}$`);
+		//@ts-expect-error
+		cliArgs.push("--name", `^${RegExp.escape(pattern)}$`);
 	}
 
 	const configFile = settings.get("configFile");
