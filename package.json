@@ -66,9 +66,9 @@
 	"devDependencies": {
 		"@kaciras/eslint-config-core": "^3.4.1",
 		"@kaciras/eslint-config-typescript": "^3.4.1",
-		"@types/node": "^24.10.1",
-		"@types/vscode": "^1.106.0",
-		"@vscode/vsce": "^3.7.0",
+		"@types/node": "^25.0.1",
+		"@types/vscode": "^1.107.0",
+		"@vscode/vsce": "^3.7.1",
 		"eslint": "^9.39.1",
 		"typescript": "^5.9.3"
 	}
