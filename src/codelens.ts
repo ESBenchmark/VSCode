@@ -3,7 +3,7 @@ import type { Node, ImportDeclaration, ExportAssignment, NamedImports } from "ty
 import { env, CodeLensProvider, TextDocument, CancellationToken, Range, CodeLens } from "vscode";
 import { DebugBenchmarkCommand, RunBenchmarkCommand } from "./command.js";
 
-// VSCode does not support impoty(), https://github.com/microsoft/vscode/issues/130367
+// VSCode does not support import(), https://github.com/microsoft/vscode/issues/130367
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const ts: typeof TypeScript = require(`${env.appRoot}/extensions/node_modules/typescript/lib/typescript.js`);
 
