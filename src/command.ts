@@ -67,7 +67,6 @@ function getRunConfig(file: string, pattern: string) {
 	const settings = vscode.workspace.getConfiguration("esbench");
 	const cliArgs = [cli, "--file", file];
 	if (pattern) {
-		//@ts-expect-error
 		cliArgs.push("--name", `^${RegExp.escape(pattern)}$`);
 	}
 
