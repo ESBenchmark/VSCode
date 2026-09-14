@@ -6,6 +6,7 @@
 		"moduleResolution": "NodeNext",
 		"types": ["node"],
         "jsx": "preserve",
+		"rootDir": "src",
         "outDir": "dist",
 		"sourceMap": true,
 		"skipLibCheck": true,
